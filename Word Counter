@@ -1,0 +1,99 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+public class WordCounter {
+    public static void main(String[] args) {
+        try {
+            String inputText = getInput();
+            String[] words = splitTextIntoWords(inputText);
+            int wordCount = countWords(words);
+            
+            System.out.println("Total words in the text: " + wordCount);
+            
+            // Additional features:
+            Map<String, Integer> wordFrequency = countWordFrequency(words);
+            System.out.println("Word frequency:");
+            for (Map.Entry<String, Integer> entry : wordFrequency.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue() + " times");
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
+    }
+
+    // Function to count words in a given text
+    private static int countWords(String[] words) {
+        return words.length;
+    }
+
+    // Function to split the text into words using space and punctuation as delimiters
+    private static String[] splitTextIntoWords(String text) {
+        return text.split("[\\s\\p{Punct}]+");
+    }
+
+    // Function to count the frequency of each word
+    private static Map<String, Integer> countWordFrequency(String[] words) {
+        Map<String, Integer> frequencyMap = new HashMap<>();
+        
+        for (String word : words) {
+            // Convert to lowercase and remove common punctuation
+            word = word.toLowerCase().replaceAll("[\\p{Punct}]", "");
+            
+            // Ignore common words or stop words (you can add more if needed)
+            if (!isCommonWord(word)) {
+                frequencyMap.put(word, frequencyMap.getOrDefault(word, 0) + 1);
+            }
+        }
+        
+        return frequencyMap;
+    }
+
+    // Function to check if a word is a common word or stop word
+    private static boolean isCommonWord(String word) {
+        String[] commonWords = {"the", "and", "is", "in", "it", "to", "of", "for", "with", "as"};
+        for (String common : commonWords) {
+            if (common.equalsIgnoreCase(word)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Function to prompt the user for input (text or file)
+    private static String getInput() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        System.out.print("Enter 'T' to input text or 'F' to input a file (Q to quit): ");
+        String choice = reader.readLine().trim().toLowerCase();
+
+        if ("t".equals(choice)) {
+            System.out.print("Enter the text: ");
+            return reader.readLine();
+        } else if ("f".equals(choice)) {
+            System.out.print("Enter the filename: ");
+            String fileName = reader.readLine();
+            try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName))) {
+                StringBuilder textBuilder = new StringBuilder();
+                String line;
+                while ((line = fileReader.readLine()) != null) {
+                    textBuilder.append(line).append(" ");
+                }
+                return textBuilder.toString();
+            } catch (IOException e) {
+                System.err.println("Error reading file: " + e.getMessage());
+                throw e;
+            }
+        } else if ("q".equals(choice)) {
+            System.exit(0);
+        } else {
+            System.out.println("Invalid choice. Please enter 'T' or 'F' (Q to quit).");
+            return getInput();
+        }
+
+        return "";
+    }
+}
